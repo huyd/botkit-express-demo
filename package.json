@@ -11,11 +11,13 @@
   "dependencies": {
     "body-parser": "^1.14.2",
     "botkit": "0.0.5",
+    "botkit-chronos": "^1.1.0",
     "dotenv": "^2.0.0",
     "ejs": "^2.4.1",
     "express": "^4.13.4",
     "mongodb": "^2.1.6",
     "monk": "^1.0.1",
-    "request": "^2.69.0"
+    "request": "^2.69.0",
+    "skellington": "^0.1.1"
   }
 }
