@@ -1,6 +1,5 @@
 var request = require('request');
 
-
 module.exports = function() {
 
   var todo_api = {
@@ -12,7 +11,7 @@ module.exports = function() {
 
       // bot.debug(command, options);
 
-      request.get(this.api_url+command, function(error, response, body) {
+      request.get(this.api_url + command, function(error, response, body) {
         // bot.debug('Got response', error, body);
         if (!error && response.statusCode == 200) {
           var json;
@@ -35,9 +34,9 @@ module.exports = function() {
     },
 
     todoList: {
-    	get: function(cb){
+    	get: function(key, cb){
     		todo_api.callAPI('todo', cb);
-    	} 
+    	}
     }
 
   };
