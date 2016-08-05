@@ -72,7 +72,7 @@ module.exports = function(app) {
           var team = {
             id: identity.team_id,
             bot:{
-              token: auth.bot.bot_access_token,
+              slackToken: auth.bot.bot_access_token,
               user_id: auth.bot.bot_user_id,
               createdBy: identity.user_id
             },
@@ -80,7 +80,7 @@ module.exports = function(app) {
             url: identity.url,
             name: identity.team
           }
-          startBot(team)
+          startBot(team.bot)
           res.send("Your bot has been installed")
 
           // saveUser(auth, identity)
