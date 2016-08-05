@@ -95,6 +95,8 @@ module.exports = function(app) {
   var startBot = function(team){
     console.log(team.name + " start bot")
 
+    team.plugins = [require('../../plugins/todobot.js')];
+
     // slack.connect(team)
     require('skellington')(team);
   }
