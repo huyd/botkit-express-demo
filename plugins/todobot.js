@@ -35,9 +35,13 @@ function addListeners(controller, bot) {
       msg = msg.substring(msg.indexOf(' ')).trim();
     };
 
-    let dueDate = parseInt(message.text.match(/todo setduedate (.*) TS(.*)/i)[2]);
-    if (dueDate) {
-      msg = message.text.match(/todo setduedate (.*) TS(.*)/i)[1];
+    let dueDate = new Date();
+
+    if (message.text.match(/todo setduedate (.*) TS(.*)/i)) {
+      dueDate = parseInt(message.text.match(/todo setduedate (.*) TS(.*)/i)[2]);
+      if (dueDate) {
+        msg = message.text.match(/todo setduedate (.*) TS(.*)/i)[1];
+      };
     };
 
     function handleResponse(response) {
