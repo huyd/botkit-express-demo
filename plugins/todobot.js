@@ -6,6 +6,7 @@ var todoApi = require('./todoApi.js')()
 const validActions = {
   'list': 'Display list of todos `todo list`',
   'add': 'Add a new todo item `todo add Buy some milk`',
+  'detail': 'Display detail todo `todo detail 123`',
   'setduedate': 'Set the due date a todo item `todo setduedate 123 monday`',
   'complete': 'Mark a todo item as complete `todo complete 123`',
   'remove': 'Remove a todo item `todo remove 123`',
@@ -56,6 +57,8 @@ function addListeners(controller, bot) {
           return handleResponse(showList(key));
         case 'add':
           return handleResponse(addTodo(key, msg));
+        case 'detail':
+          return handleResponse(showDetail(msg));
         case 'setduedate':
           return handleResponse(setDueDate(key, msg, dueDate));
         case 'complete':
@@ -111,6 +114,34 @@ function addTodo(key, message) {
 
     return `:white_medium_square: [${newTodo.id}] ${newTodo.title}`
   });
+};
+
+function showDetail(message) {
+  return {
+    "attachments": [
+      {
+        "title": "<https://honeybadger.io/path/to/event/|ReferenceError> - UI is not defined",
+        "fields": [
+          {
+            "title": "Description",
+            "value": "Description",
+            "short": false
+          },
+          {
+            "title": "Due Date",
+            "value": new Date(),
+            "short": true
+          },
+          {
+            "title": "Complete",
+            "value": "false",
+            "short": true
+          }
+        ],
+        "color": "#F35A00"
+      }
+    ]
+  }
 };
 
 function setDueDate(key, message, dueDate) {
