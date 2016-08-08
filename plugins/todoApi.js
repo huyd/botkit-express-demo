@@ -36,7 +36,6 @@ module.exports = function() {
     },
     todoList: {
       get: function(channel, cb){
-        console.log('get list');
         var param = '?channel='+channel;
         todo_api.callAPI('GET','todo', param, cb);
       }

@@ -150,7 +150,6 @@ function showList(key) {
         message += `:white_medium_square: [${i+1}] ${todoList[key][i].title}\n`;
       }
     }
-    console.log(message);
     return resolve(message);
   })
 };
@@ -178,7 +177,6 @@ function addTodo(key, message) {
 function showDetail(key, message) {
   return new Promise((resolve, reject) => {
     var item = todoList[key][parseInt(message)-1];
-    console.log(item)
     if(item.complete) {
       var status = "YES";
     }else {
@@ -218,7 +216,6 @@ function setDescripton(key, message) {
     var indexItem = message.split(' ')[0];
     var descText = message.substring(indexItem.length+1);
     var itemUpdate = todoList[key][indexItem-1]
-    console.log('update',descText);
     var updateData = {
       id: itemUpdate.id,
       item: 'description',
@@ -237,7 +234,6 @@ function setDescripton(key, message) {
 
 function setDueDate(key, message, dueDate) {
   return new Promise((resolve, reject) => {
-    console.log(dueDate.toString());
     var itemUpdate = todoList[key][parseInt(message)-1];
     var updateData = {
       id: itemUpdate.id,
