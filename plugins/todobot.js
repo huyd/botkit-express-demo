@@ -12,7 +12,7 @@ const validActions = {
   'detail': 'Display detail todo `todo detail 123`',
   'setdesc': 'set description for a todo item `todo setdesc 123 At supermarket`',
   'setduedate': 'Set due date for a todo item `todo setduedate 123 monday`',
-  'complete': 'Mark a todo item as completed `todo completed 123`',
+  'complete': 'Mark a todo item as completed `todo complete 123`',
   'remove': 'Remove a todo item `todo remove 123`',
   'help': 'Show this help text `todo help`'
 };
@@ -38,7 +38,6 @@ function addListeners(controller, bot) {
     let key = message.channel;
 
     if (!todoList[key]) {
-      todoList[key] = [];
       getListTodo(key);
     };
 
@@ -83,11 +82,23 @@ function addListeners(controller, bot) {
             handleResponse('Error');
           });
         case 'detail':
-          return handleResponse(showDetail(msg));
+          return showDetail(key, msg).then(function(data) {
+            handleResponse(data);
+          }).catch(function(err) {
+            handleResponse('Error');
+          });
         case 'setduedate':
-          return handleResponse(setDueDate(key, msg, dueDate));
+          return setDueDate(key, msg, dueDate).then(function(data) {
+            handleResponse(data);
+          }).catch(function(err) {
+            handleResponse('Error');
+          });
         case 'complete':
-          return handleResponse(completeTodo(key, msg));
+          return completeTodo(key, msg).then(function(data) {
+            handleResponse(data);
+          }).catch(function(err) {
+            handleResponse('Error');
+          });
         case 'remove':
           return removeTodo(key, msg).then(function(data){
             handleResponse(data);
@@ -102,11 +113,16 @@ function addListeners(controller, bot) {
 }
 
 function getListTodo(key) {
-  todoApi.todoList.get(key, function(err, data) {
-    if (!err) {
-      todoList[key] = data;
-    }
-  });
+  if(!todoList[key]) {
+    todoApi.todoList.get(key, function(err, data) {
+      if (err) {
+        console.log(err);
+      }else {
+        todoList[key] = data;
+      }
+    });
+  }
+
 }
 
 
@@ -125,21 +141,18 @@ function showHelp(unknownCommand) {
 
 // Show list todos
 function showList(key) {
-  if (!todoList[key]) {
-    todoList[key] = [];
-  };
   return new Promise((resolve, reject) => {
-    
     let message = '';
-    
     if(!todoList[key] || !todoList[key].length) {
       message = 'You currently have an empty todo list! :smile:';
     } else {
       for( let i = 0; i < todoList[key].length; i++) {
-        message += `:white_medium_square: [${i+1}] ${todoList[i].title}\n`;
+        message += `:white_medium_square: [${i+1}] ${todoList[key][i].title}\n`;
       }
     }
+    console.log(message);
     return resolve(message);
+  })
 };
 
 // Add new todo
@@ -155,134 +168,124 @@ function addTodo(key, message) {
         return reject(err);
       };
 
-      todoList.push(item);
+      todoList[key].push(newTodo);
       return resolve(`:white_medium_square: Added todo:  ${newTodo.title}`)
     });
   });
 };
 
-function showDetail(message) {
-  return {
-    "attachments": [
-      {
-        "title": "<https://honeybadger.io/path/to/event/|ReferenceError> - UI is not defined",
-        "fields": [
-          {
-            "title": "Description",
-            "value": "Description",
-            "short": false
-          },
-          {
-            "title": "Due Date",
-            "value": new Date(),
-            "short": true
-          },
-          {
-            "title": "Complete",
-            "value": "false",
-            "short": true
-          }
-        ],
-        "color": "#F35A00"
-      }
-    ]
-  }
+//show detail todo 
+function showDetail(key, message) {
+  return new Promise((resolve, reject) => {
+    var item = todoList[key][parseInt(message)-1];
+    console.log(item)
+    if(item.complete) {
+      var status = "YES";
+    }else {
+      var status = "NO";
+    }
+    return resolve({
+      "attachments": [
+        {
+          "title": item.title,
+          "fields": [
+            {
+              "title": "Description",
+              "value": item.description,
+              "short": false
+            },
+            {
+              "title": "Due Date",
+              "value": (item.due_date === 'Not yet update...') ? item.due_date : new Date(item.due_date),
+              "short": true
+            },
+            {
+              "title": "Complete",
+              "value": status,
+              "short": true
+            }
+          ],
+          "color": "#F35A00"
+        }
+      ]
+    })
+  })
 };
 
 // Set Description for a todo
 function setDescripton(key, message) {
   return new Promise((resolve, reject) => {
-    async.waterfall([
-      function (callback) {
-        if(!todoList.length){
-          todoApi.todoList.get(key, function(err, data) {
-            if (err) {
-              callback(err);
-            } else {
-              todoList = data;
-              callback();
-            }
-          });
-        } else {
-          callback();
-        }
-      }
-    ], function(err) {
+    var indexItem = message.split(' ')[0];
+    var descText = message.substring(indexItem.length+1);
+    var itemUpdate = todoList[key][indexItem-1]
+    console.log('update',descText);
+    var updateData = {
+      id: itemUpdate.id,
+      item: 'description',
+      value: descText
+    }
+    return todoApi.todoItem.update(updateData, function(err, data) {
       if (err) {
         return reject(err);
-      };
-      var indexItem = message.split(' ')[0];
-      var descText = message.substring(indexItem.length+1);
-      var itemUpdate = todoList[indexItem-1]
-      var updateData = {
-        id: itemUpdate.id,
-        title: itemUpdate.title,
-        description: descText,
-        due_date: itemUpdate.duedate || "",
-        complete: itemUpdate.complete || false
+      } else {
+      todoList[key][indexItem-1].description = descText;
+      return resolve('Update description: `'+descText+'` of todo'+todoList[key][indexItem-1].title+'');
       }
-      return todoApi.todoItem.update(updateData, function(err, data) {
-        if (err) {
-          return reject(err);
-        };
-        todoList[indexItem] = updateData;
-        return resolve('Update description: `'+descText+'` of '+itemUpdate.title+'');
-      });
-    })
+    });
   })
 }
 
 function setDueDate(key, message, dueDate) {
-  return todoApi.todoList.setDueDate(key, message, dueDate, function(err, todo) {
-    if (err) {
-      return err;
-    };
-
-    return '';
-  });
+  return new Promise((resolve, reject) => {
+    console.log(dueDate.toString());
+    var itemUpdate = todoList[key][parseInt(message)-1];
+    var updateData = {
+      id: itemUpdate.id,
+      item: 'due_date',
+      value: dueDate,
+    }
+    return todoApi.todoItem.update(updateData, function(err, todo) {
+      if (err) {
+        return err;
+      };
+      todoList[key][parseInt(message)-1].due_date = dueDate;
+      return resolve('Update dueDate: `'+new Date(dueDate)+'` of todo '+todoList[key][parseInt(message)-1].title+'');
+    });
+  })
 };
 
-function completeTodo(key, todoId) {
-  return todoApi.todoList.completeTodo(key, todoId, function(err, completedTodo) {
-    if (err) {
-      return err;
-    };
-    return `:ballot_box_with_check: [${completedTodo.id}] ${completedTodo.title}\n`
-  });
+function completeTodo(key, message) {
+  return new Promise((resolve, reject) => {
+    var indexItem = message.split(' ')[0];
+    var itemUpdate = todoList[key][indexItem-1]
+    var updateData = {
+      id: itemUpdate.id,
+      item: 'complete',
+      value: true,
+    }
+    return todoApi.todoItem.update(updateData, function(err, data) {
+      if (err) {
+        return reject(err);
+      } else {
+      todoList[key][indexItem-1].complete = true;
+      return resolve('Completed: '+todoList[key][indexItem-1].title);
+      }
+    });
+  })
 };
 
 
 //  Remove a todo
 function removeTodo(key, message) {
   return new Promise((resolve, reject) => {
-    async.waterfall([
-      function (callback) {
-        if(!todoList.length){
-          todoApi.todoList.get(key, function(err, data) {
-            if (err) {
-              callback(err);
-            } else {
-              todoList = data;
-              callback();
-            }
-          });
-        } else {
-          callback();
-        }
-      }
-    ], function(err) {
-      if (err) {
-        return reject(err);
-      };
-      var id = todoList[parseInt(message)-1].id;
+      var id = todoList[key][parseInt(message)-1].id;
       return todoApi.todoItem.del(id, function(err, removedTodo) {
         if (err) {
           return reject(err);
         };
-        let tiltleRemove = todoList[parseInt(message)-1].title;
-        todoList.splice(parseInt(message)-1, 1);
+        let tiltleRemove = todoList[key][parseInt(message)-1].title;
+        todoList[key].splice(parseInt(message)-1, 1);
         return resolve('Removed todo `'+tiltleRemove+'` from your list');
       });
-    })
   })
 };

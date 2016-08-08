@@ -25,7 +25,6 @@ module.exports = function() {
             json: options
           }, function(error, response, body) {
           if (!error && response.statusCode == 200) {
-            console.log(body);
             cb(null, body);
           } else {
             if (cb) cb(error || 'Invalid response');
