@@ -26,7 +26,7 @@ module.exports = function(app) {
       console.log("New user auth code " + auth_code)
       perform_auth(auth_code, res)
     }
-  })
+  });
 
   //CREATION ===================================================
 

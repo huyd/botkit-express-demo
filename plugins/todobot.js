@@ -9,6 +9,7 @@ var async = require('async');
 const validActions = {
   'list': 'Display list of todos `todo list`',
   'add': 'Add a new todo item `todo add Buy some milk`',
+  'detail': 'Display detail todo `todo detail 123`',
   'setdesc': 'set description for a todo item `todo setdesc 123 At supermarket`',
   'setduedate': 'Set due date for a todo item `todo setduedate 123 monday`',
   'complete': 'Mark a todo item as completed `todo completed 123`',
@@ -46,10 +47,14 @@ function addListeners(controller, bot) {
       msg = msg.substring(msg.indexOf(' ')).trim();
     };
 
-    // let dueDate = parseInt(message.text.match(/todo setduedate (.*) TS(.*)/i)[2]);
-    // if (dueDate) {
-    //   msg = message.text.match(/todo setduedate (.*) TS(.*)/i)[1];
-    // };
+    let dueDate = new Date();
+
+    if (message.text.match(/todo setduedate (.*) TS(.*)/i)) {
+      dueDate = parseInt(message.text.match(/todo setduedate (.*) TS(.*)/i)[2]);
+      if (dueDate) {
+        msg = message.text.match(/todo setduedate (.*) TS(.*)/i)[1];
+      };
+    };
 
     function handleResponse(response) {
       bot.reply(message, response);
@@ -77,8 +82,10 @@ function addListeners(controller, bot) {
           }).catch(function(err) {
             handleResponse('Error');
           });
-        // case 'setduedate':
-        //   return handleResponse(setDueDate(key, msg, dueDate));
+        case 'detail':
+          return handleResponse(showDetail(msg));
+        case 'setduedate':
+          return handleResponse(setDueDate(key, msg, dueDate));
         case 'complete':
           return handleResponse(completeTodo(key, msg));
         case 'remove':
@@ -135,12 +142,6 @@ function showList(key) {
     return resolve(message);
 };
 
-function showDetail(key){
-  return new Promise((resolve, reject) => {
-
-  });
-}
-
 // Add new todo
 function addTodo(key, message) {
   return new Promise((resolve, reject) => {
@@ -158,6 +159,34 @@ function addTodo(key, message) {
       return resolve(`:white_medium_square: Added todo:  ${newTodo.title}`)
     });
   });
+};
+
+function showDetail(message) {
+  return {
+    "attachments": [
+      {
+        "title": "<https://honeybadger.io/path/to/event/|ReferenceError> - UI is not defined",
+        "fields": [
+          {
+            "title": "Description",
+            "value": "Description",
+            "short": false
+          },
+          {
+            "title": "Due Date",
+            "value": new Date(),
+            "short": true
+          },
+          {
+            "title": "Complete",
+            "value": "false",
+            "short": true
+          }
+        ],
+        "color": "#F35A00"
+      }
+    ]
+  }
 };
 
 // Set Description for a todo
