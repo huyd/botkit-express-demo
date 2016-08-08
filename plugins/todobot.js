@@ -196,7 +196,7 @@ function showDetail(key, message) {
             },
             {
               "title": "Due Date",
-              "value": (item.due_date === 'Not yet update...') ? item.due_date : new Date(item.due_date),
+              "value": (item.due_date === 'Not yet update...') ? item.due_date : new Date(item.due_date).toLocaleDateString(),
               "short": true
             },
             {
@@ -249,7 +249,7 @@ function setDueDate(key, message, dueDate) {
         return err;
       };
       todoList[key][parseInt(message)-1].due_date = dueDate;
-      return resolve('Update dueDate: `'+new Date(dueDate)+'` of todo '+todoList[key][parseInt(message)-1].title+'');
+      return resolve('Update dueDate: `'+new Date(dueDate).toLocaleDateString()+'` of todo '+todoList[key][parseInt(message)-1].title+'');
     });
   })
 };
