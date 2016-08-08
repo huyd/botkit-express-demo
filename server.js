@@ -34,5 +34,9 @@ require('./app/controllers/botkit')
 //START ===================================================
 http.listen(app.get('port'), function(){
   console.log('listening on port ' + app.get('port'));
+  require('skellington')({
+  	slackToken: 'xoxb-60591206918-kjdJHzsJvJqfWcV5bPLGubPs',
+  	plugins: [require('./plugins/todobot.js')],
+  });
 });
 

@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.0.1",
     "body-parser": "^1.14.2",
     "botkit": "0.0.5",
     "botkit-chronos": "^1.1.0",

@@ -6,68 +6,58 @@ module.exports = function() {
     api_url: 'https://l6dp2igafd.execute-api.us-west-2.amazonaws.com/api/',
 
     // this is a simple function used to call the slack web API
-    getAPI: function(command,options, cb) {
-      request.get(this.api_url+command+options, function(error, response, body) {
-      if (!error && response.statusCode == 200) {
-        cb(err, body);
-      } else {
-        if (cb) cb(error || 'Invalid response');
-      }
-    });
-    },
-    postAPI: function(command, options, cb) {
-      request({
-          url: this.api_url+command, //URL to hit
-          method: 'POST',
-          json: options
-      }, function(error, response, body) {
-      if (!error && response.statusCode == 200) {
-        cb(body);
-      } else {
-        if (cb) cb(error || 'Invalid response');
-      }
-     });
-    },
-    putAPI: function(command, options, cb) {
-        request.put(this.api_url+command, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-          cb(body);
+    callAPI: function(method,command,options, cb) {
+      if(!method){
+        return err;
+      } else{
+        if(method == 'GET'){
+          request.get(this.api_url+command+options, function(error, response, body) {
+          if (!error && response.statusCode == 200) {
+            cb(null, JSON.parse(body));
+          } else {
+            if (cb) cb(error || 'Invalid response');
+          }
+          });
         } else {
-          if (cb) cb(error || 'Invalid response');
+          request({
+            url: this.api_url+command, //URL to hit
+            method: method,
+            json: options
+          }, function(error, response, body) {
+          if (!error && response.statusCode == 200) {
+            console.log(body);
+            cb(null, body);
+          } else {
+            if (cb) cb(error || 'Invalid response');
+          }
+         });
         }
-      })
-    },
-    deleteAPI: function(command,options, cb) {
-      request({
-          url: this.api_url+command, //URL to hit
-          method: 'DELETE',
-          json: options
-      }, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-          cb(err, body);
-        } else {
-          if (cb) cb(error || 'Invalid response');
-        }
-      });
+        
+      }
     },
     todoList: {
-      get: function(cb){
-        todo_api.getAPI('todo', cb);
+      get: function(channel, cb){
+        console.log('get list');
+        var param = '?channel='+channel;
+        todo_api.callAPI('GET','todo', param, cb);
       }
     },
     todoItem: {
       get: function(id, cb) {
         var params = '?id='+id;
-        todo_api.getAPI('todoitem',params, cb);
+        todo_api.callAPI('GET','todoitem', params, cb);
       },
       update: function(options, cb) {
-        todo_api.putAPI('todoitem',options, cb)
+        todo_api.callAPI('PUT','todoitem', options, cb)
       },
       add: function(options, cb) {
-        todo_api.postAPI('todo',options, cb );
+        todo_api.callAPI('POST','todo', options, cb );
       },
       del: function(options, cb){
-        todo_api.deleteAPI('todoitem',options, cb);
+        var params = {
+          id: options 
+        }
+        todo_api.callAPI('DELETE','todoitem', params, cb);
       }
     }
   };
