@@ -34,12 +34,7 @@ function addListeners(controller, bot) {
       action = action.trim().toLowerCase();
     };
 
-
     let key = message.channel;
-
-    if (!todoList[key]) {
-      getListTodo(key);
-    };
 
     let msg = (message.text || '').replace('todo', '').trim();
     if (msg) {
@@ -59,69 +54,78 @@ function addListeners(controller, bot) {
       bot.reply(message, response);
     }
 
-    if(validActions.hasOwnProperty(action)) {
-      switch(action) {
-        case 'help':
-          return handleResponse(showHelp());
-        case 'list':
-          return showList(key).then(function(data) {
-            handleResponse(data);
-          }).catch(function(err) {
-            handleResponse('Error');
-          });
-        case 'add':
-          return addTodo(key, msg).then(function(data) {
-            handleResponse(data);
-          }).catch(function(err) {
-            handleResponse('Error');
-          });
-        case 'setdesc':
-          return setDescripton(key, msg).then(function(data) {
-            handleResponse(data);
-          }).catch(function(err) {
-            handleResponse('Error');
-          });
-        case 'detail':
-          return showDetail(key, msg).then(function(data) {
-            handleResponse(data);
-          }).catch(function(err) {
-            handleResponse('Error');
-          });
-        case 'setduedate':
-          return setDueDate(key, msg, dueDate).then(function(data) {
-            handleResponse(data);
-          }).catch(function(err) {
-            handleResponse('Error');
-          });
-        case 'complete':
-          return completeTodo(key, msg).then(function(data) {
-            handleResponse(data);
-          }).catch(function(err) {
-            handleResponse('Error');
-          });
-        case 'remove':
-          return removeTodo(key, msg).then(function(data){
-            handleResponse(data);
-          }).catch(function(err) {
-            handleResponse('Error');
-          })
+    getListTodo(key).then(function(data){
+      
+      todoList[key] = data;
+      if(validActions.hasOwnProperty(action)) {
+        switch(action) {
+          case 'help':
+            return handleResponse(showHelp());
+          case 'list':
+            return showList(key).then(function(data) {
+              handleResponse(data);
+            }).catch(function(err) {
+              handleResponse('Error');
+            });
+          case 'add':
+            return addTodo(key, msg).then(function(data) {
+              handleResponse(data);
+            }).catch(function(err) {
+              handleResponse('Error');
+            });
+          case 'setdesc':
+            return setDescripton(key, msg).then(function(data) {
+              handleResponse(data);
+            }).catch(function(err) {
+              handleResponse('Error');
+            });
+          case 'detail':
+            return showDetail(key, msg).then(function(data) {
+              handleResponse(data);
+            }).catch(function(err) {
+              handleResponse('Error');
+            });
+          case 'setduedate':
+            return setDueDate(key, msg, dueDate).then(function(data) {
+              handleResponse(data);
+            }).catch(function(err) {
+              handleResponse('Error');
+            });
+          case 'complete':
+            return completeTodo(key, msg).then(function(data) {
+              handleResponse(data);
+            }).catch(function(err) {
+              handleResponse('Error');
+            });
+          case 'remove':
+            return removeTodo(key, msg).then(function(data){
+              handleResponse(data);
+            }).catch(function(err) {
+              handleResponse('Error');
+            })
+        }
+      } else {
+        return handleResponse(showHelp(true));
       }
-    } else {
-      return handleResponse(showHelp(true));
-    }
+    });
+    
   });
 }
 
 function getListTodo(key) {
-  if(!todoList[key]) {
-    todoApi.todoList.get(key, function(err, data) {
-      if (err) {
-        console.log(err);
-      }else {
-        todoList[key] = data;
-      }
-    });
-  }
+  return new Promise((resolve, reject) => {
+    if(!todoList[key]) {
+      todoApi.todoList.get(key, function(err, data) {
+        if (err) {
+          reject(err);
+        }else {
+          return resolve(data);
+        }
+      });
+    } else {
+      return resolve(todoList[key]);
+    }
+  });
 
 }
 
